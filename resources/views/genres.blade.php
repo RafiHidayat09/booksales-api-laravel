@@ -7,10 +7,11 @@
 </head>
 <body>
     <h1>Ini adalah halaman genre buku</h1>
-       @foreach ($genres as $item)
+       @foreach ($genres as $genre)
         <ul>
-            <li><strong>Nama:</strong> {{ $item['name'] }}</li>
-            <li><strong>Deskripsi:</strong> {{ $item['description'] }}</li>
+            <li><strong>Nama:</strong> {{ $genre['name'] }}</li>
+            <li><strong>Deskripsi:</strong> {{ $genre['description'] }}</li>
+            
         </ul>
     @endforeach
 </body>

@@ -8,8 +8,7 @@ class Genre extends Model
 {
    
    protected $table = 'genres';
-   //Untuk bagian model genre tugas 2 sudah tergabung push oleh tugas 3 kak mohon maaf karena baru kepikiran untuk membuat branch
-   //Jadi saya buat komen
+ 
    //  private $genres = [
    //      [
    //          'name' => 'Fiksi',

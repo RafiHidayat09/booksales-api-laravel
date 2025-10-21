@@ -16,20 +16,20 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api'); // Untuk mengakses logout harus login dahulu
 
-Route::apiResource('/books', BookController::class)->only(['index', 'show']);     // Misal Semua Data Buku bisa diakses oleh semua orang
-Route::apiResource('/authors', AuthorController::class)->only('index', 'show'); // Misal semua data author dan genre bisa diakses oleh semua orang
-Route::apiResource('/genres', GenreController::class)->only('index','show');
 
 Route::middleware(['auth:api'])->group(function(){
-    Route::apiResource('/transactions', TransactionController::class)->only('index', 'store', 'show'); // Transaction bisa diakses jika sudah login
-    // Route::apiResource('/genres', GenreController::class); // Genre Bisa diakses jika login
-    // Namun untuk menambahkan data buku hanya bisa ditambahkan orang yang sudah login
+    // Bagian yang update, create, dan show bisa diakses semua user yang sudah login
+    Route::apiResource('/books', BookController::class)->only(['update', 'store','show']);    
+    Route::apiResource('/authors', AuthorController::class)->only('update', 'store', 'show'); 
+    Route::apiResource('/genres', GenreController::class)->only('update','store','show');
+    Route::apiResource('/transactions', TransactionController::class)->only('update', 'store', 'show');
+    // Untuk menambahkan dan menghapus data hanya bisa dilakukan orang yang sudah login
     // Dan hanya role admin yang bisa menambahkan
     Route::middleware(['role:admin'])->group(function(){
-        Route::apiResource('/transactions', TransactionController::class)->only('update', 'destroy'); // Update dan Destroy hanya untuk admin
-        Route::apiResource('/books', BookController::class)->only(['store', 'update', 'destroy']);
-        Route::apiResource('/genres', GenreController::class)->only(['store', 'update', 'destroy']);
-        Route::apiResource('/authors', AuthorController::class)->only(['store', 'update', 'destroy']);
+        Route::apiResource('/transactions', TransactionController::class)->only('index', 'destroy'); // Read All dan Destroy hanya untuk admin
+        Route::apiResource('/books', BookController::class)->only(['index', 'destroy']);
+        Route::apiResource('/genres', GenreController::class)->only(['index', 'destroy']);
+        Route::apiResource('/authors', AuthorController::class)->only(['index', 'destroy']);
 
 
     });

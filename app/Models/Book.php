@@ -9,6 +9,7 @@ class Book extends Model
     protected $table = 'books'; // Mengetahui nama 'books' dari migrationnya
     protected $fillable  =['title', 'description', 'price', 'stock', 'cover_photo', 'genre_id', 'author_id'];
   
+     // Relasi ke Genre
     public function genre()
     {
         return $this->belongsTo(Genre::class);

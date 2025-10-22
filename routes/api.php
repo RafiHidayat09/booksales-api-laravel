@@ -8,31 +8,56 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\TransactionController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
+// =======================
+// 🔐 AUTH ROUTES
+// =======================
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api'); // Untuk mengakses logout harus login dahulu
 
+// =======================
+// 🌍 PUBLIC ACCESS (tanpa login)
+// =======================
+Route::apiResource('/books', BookController::class)->only(['index', 'show']);
 
-Route::middleware(['auth:api'])->group(function(){
-    // Bagian yang update, create, dan show bisa diakses semua user yang sudah login
-    Route::apiResource('/books', BookController::class)->only(['update', 'store','show']);    
-    Route::apiResource('/authors', AuthorController::class)->only('update', 'store', 'show'); 
-    Route::apiResource('/genres', GenreController::class)->only('update','store','show');
-    Route::apiResource('/transactions', TransactionController::class)->only('update', 'store', 'show');
-    // Untuk menambahkan dan menghapus data hanya bisa dilakukan orang yang sudah login
-    // Dan hanya role admin yang bisa menambahkan
-    Route::middleware(['role:admin'])->group(function(){
-        Route::apiResource('/transactions', TransactionController::class)->only('index', 'destroy'); // Read All dan Destroy hanya untuk admin
-        Route::apiResource('/books', BookController::class)->only(['index', 'destroy']);
-        Route::apiResource('/genres', GenreController::class)->only(['index', 'destroy']);
-        Route::apiResource('/authors', AuthorController::class)->only(['index', 'destroy']);
+Route::get('/genres', [GenreController::class, 'index']);
+Route::get('/genres/{id}', [GenreController::class, 'show']);
 
+Route::get('/authors', [AuthorController::class, 'index']);
+Route::get('/authors/{id}', [AuthorController::class, 'show']);
 
-    });
-   
+// =======================
+// 👤 USER (HARUS LOGIN)
+// =======================
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Transaksi user
+    Route::post('/transactions', [TransactionController::class, 'store']); // Buat transaksi baru
+    Route::get('/transactions/{id}', [TransactionController::class, 'show']); // Lihat transaksi sendiri
 });
 
+// =======================
+// 🛡️ ADMIN ONLY
+// =======================
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+
+    // Transaksi (lihat semua, edit, hapus)
+    Route::get('/transactions', [TransactionController::class, 'index']);
+    Route::put('/transactions/{id}', [TransactionController::class, 'update']);
+    Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);
+
+    // CRUD Buku
+    Route::post('/books', [BookController::class, 'store']);
+    Route::put('/books/{id}', [BookController::class, 'update']);
+    Route::delete('/books/{id}', [BookController::class, 'destroy']);
+
+    // CRUD Genre
+    Route::post('/genres', [GenreController::class, 'store']);
+    Route::put('/genres/{id}', [GenreController::class, 'update']);
+    Route::delete('/genres/{id}', [GenreController::class, 'destroy']);
+
+    // CRUD Author
+    Route::post('/authors', [AuthorController::class, 'store']);
+    Route::put('/authors/{id}', [AuthorController::class, 'update']);
+    Route::delete('/authors/{id}', [AuthorController::class, 'destroy']);
+});

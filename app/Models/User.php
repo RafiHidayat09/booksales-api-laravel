@@ -58,4 +58,14 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims() {
         return [];
     }
+
+    // Relasi
+    public function carts() {
+    return $this->hasMany(Cart::class);
+}
+
+public function orders() {
+    return $this->hasMany(Order::class);
+}
+
 }

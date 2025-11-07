@@ -12,7 +12,7 @@ class TransactionController extends Controller
     public function index()
     {
         // Jangan lupa di import class Transactionnya
-        $transactions = Transaction::with('user', 'book')->get(); // Untuk menampilkan data usernya juga 
+        $transactions = Transaction::with('user', 'book')->get(); // Untuk menampilkan data usernya juga
         // $transactions = Transaction::with('user', 'book')->find($id); // Untuk show id
 
         if ($transactions->isEmpty()){
@@ -61,7 +61,7 @@ class TransactionController extends Controller
 
         // 4. Mencari data buku dari request
         $book = Book::find($request->book_id); // Book jangan lupa di import
-        
+
         // 5. Cek stok buku (jika stok kurang maka tidak boleh membeli lebih dari jumlah yang ada)
         if ($book->stock < $request->quantity){
             return response()->json([
@@ -71,7 +71,7 @@ class TransactionController extends Controller
         }
 
         // 6. Hitung total harga (price * quantity)
-        $totalAmount = $book->price * $request->quantity; 
+        $totalAmount = $book->price * $request->quantity;
 
         // 7. Kurangi stok buku (update)
         $book->stock -= $request->quantity;
@@ -92,4 +92,31 @@ class TransactionController extends Controller
         ], 201);
 
     }
+
+    public function updateStatus(Request $request, $id)
+{
+    $validator = Validator::make($request->all(), [
+        'status' => 'required|in:pending,accepted,rejected',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validator Error',
+            'data' => $validator->errors(),
+        ], 422);
+    }
+
+    $transaction = Transaction::findOrFail($id);
+    $transaction->status = $request->status;
+    $transaction->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Status updated successfully',
+        'data' => $transaction
+    ]);
+}
+
+
 }

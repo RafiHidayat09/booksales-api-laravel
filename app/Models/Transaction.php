@@ -12,6 +12,8 @@ class Transaction extends Model
         'customer_id',
         'book_id',
         'total_amount',
+         'payment_method',
+        'status',
     ];
 
     // Masing masing relasi buat 1 method saja

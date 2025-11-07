@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
@@ -31,17 +32,19 @@ class AuthController extends Controller
 
         // 4. Cek Keberhasilan
         if ($user){
+            $token = JWTAuth::fromUser($user);
             return response()->json([
                 'success'=> true,
                 'message' => 'User Created Successfully',
-                'data'=> $user
+                'data'=> $user,
+                'token'=> $token
             ], 201);
         }
 
         // 5. Cek Kegalalan
         return response()->json([
             'success' => false,
-            'message' => 'User Creation Failed',   
+            'message' => 'User Creation Failed',
         ], 409); // Conflict
     }
 
@@ -52,7 +55,7 @@ class AuthController extends Controller
             // Biasanya kalau login menggunakan email dan password
             'email' => 'required|email',
             'password' => 'required' //tidak usah pakai min, karena itu untuk register
-        ]);  
+        ]);
 
         // 2. Cek Validator
         if ($validator->fails()) {
@@ -79,7 +82,7 @@ class AuthController extends Controller
         ], 200);
     }
      public function logout(Request $request) {
-        // try 
+        // try
         // 1. Invalidate Token (Supaya token tidak dapat digunakan kembali)
         // 2. Cek isSuccess
         // catch (jika gagal)

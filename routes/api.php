@@ -4,60 +4,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\TransactionController;
 
-// =======================
-// 🔐 AUTH ROUTES
-// =======================
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
-// =======================
-// 🌍 PUBLIC ACCESS (tanpa login)
-// =======================
 Route::apiResource('/books', BookController::class)->only(['index', 'show']);
+Route::apiResource('/authors', AuthorController::class)->only(['index', 'show']);
+Route::apiResource('/genres', GenreController::class)->only(['index', 'show']);
 
-Route::get('/genres', [GenreController::class, 'index']);
-Route::get('/genres/{id}', [GenreController::class, 'show']);
 
-Route::get('/authors', [AuthorController::class, 'index']);
-Route::get('/authors/{id}', [AuthorController::class, 'show']);
-
-// =======================
-// 👤 USER (HARUS LOGIN)
-// =======================
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-
-    // Transaksi user
-    Route::post('/transactions', [TransactionController::class, 'store']); // Buat transaksi baru
-    Route::get('/transactions/{id}', [TransactionController::class, 'show']); // Lihat transaksi sendiri
+Route::middleware('auth:api')->group(function () {
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart', [CartController::class, 'store']);
+    Route::delete('/cart/{id}', [CartController::class, 'destroy']);
 });
 
-// =======================
-// 🛡️ ADMIN ONLY
-// =======================
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
-    // Transaksi (lihat semua, edit, hapus)
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
+
     Route::get('/transactions', [TransactionController::class, 'index']);
-    Route::put('/transactions/{id}', [TransactionController::class, 'update']);
-    Route::delete('/transactions/{id}', [TransactionController::class, 'destroy']);
+    Route::post('/transactions', [TransactionController::class, 'store']);
+    Route::put('/transactions/{id}', [TransactionController::class, 'updateStatus']);
 
-    // CRUD Buku
+
+    Route::get('/users', [UserController::class, 'index']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
     Route::post('/books', [BookController::class, 'store']);
     Route::put('/books/{id}', [BookController::class, 'update']);
     Route::delete('/books/{id}', [BookController::class, 'destroy']);
 
-    // CRUD Genre
     Route::post('/genres', [GenreController::class, 'store']);
     Route::put('/genres/{id}', [GenreController::class, 'update']);
     Route::delete('/genres/{id}', [GenreController::class, 'destroy']);
 
-    // CRUD Author
-    Route::post('/authors', [AuthorController::class, 'store']);
-    Route::put('/authors/{id}', [AuthorController::class, 'update']);
-    Route::delete('/authors/{id}', [AuthorController::class, 'destroy']);
-});
